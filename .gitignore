@@ -5,3 +5,5 @@ log/
 data/
 
 .clang-format
+
+__pycache__/
