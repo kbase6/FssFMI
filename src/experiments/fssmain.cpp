@@ -144,7 +144,8 @@ int main(int argc, char *argv[]) {
         // ################################
         fss::ZeroTestSetup(bitsize);
         fss::EqualitySetup(bitsize);
-        std::vector<uint32_t> database(254);
+        fss::CompareSetup(bitsize);
+        std::vector<uint32_t> database(utils::Pow(2, bitsize) - 1);
         GenerateRandomNumbers(database, 1);
         fss::FMISearchSetup(bitsize, database);
 
@@ -168,10 +169,8 @@ int main(int argc, char *argv[]) {
         utils::Logger::InfoLog(LOCATION, "Input: x = 123");
         x = ss.Share(123);
         if (party.GetId() == 0) {
-            utils::Logger::InfoLog(LOCATION, "Party 0: x_0 = " + std::to_string(x.first));
             z_0 = fss::ZeroTest(party, x.first, bitsize);
         } else {
-            utils::Logger::InfoLog(LOCATION, "Party 1: x_1 = " + std::to_string(x.second));
             z_1 = fss::ZeroTest(party, x.second, bitsize);
         }
         z = ss.Reconst(party, z_0, z_1);    // 実際はユーザが復元する部分
@@ -202,19 +201,45 @@ int main(int argc, char *argv[]) {
         e = ss.Reconst(party, e_0, e_1);    // 実際はユーザが復元する部分
         utils::PrintValidity("Equality Test", e, 0, false);
 
+        utils::Logger::InfoLog(LOCATION, "Executing Compare Test...");
+
+        utils::Logger::InfoLog(LOCATION, "Input: x = 12, y = 34 (|x-y|=22<2^(n-1))");
+        x = ss.Share(12);
+        y = ss.Share(34);
+        uint32_t c_0{0}, c_1{0};
+        if (party.GetId() == 0) {
+            c_0 = fss::Compare(party, x.first, y.first, bitsize);
+        } else {
+            c_1 = fss::Compare(party, x.second, y.second, bitsize);
+        }
+        uint32_t c = ss.Reconst(party, c_0, c_1);    // 実際はユーザが復元する部分
+        utils::PrintValidity("Compare Test", c, 1, false);
+
+        utils::Logger::InfoLog(LOCATION, "Input: x = 567, y = 89 (|x-y|=478>2^(n-1))");
+        x = ss.Share(567);
+        y = ss.Share(89);
+        if (party.GetId() == 0) {
+            c_0 = fss::Compare(party, x.first, y.first, bitsize);
+        } else {
+            c_1 = fss::Compare(party, x.second, y.second, bitsize);
+        }
+        c = ss.Reconst(party, c_0, c_1);    // 実際はユーザが復元する部分
+        utils::PrintValidity("Compare Test", c, 0, false);
+
         utils::Logger::InfoLog(LOCATION, "Executing FMI Search...");
-        std::vector<uint32_t> q = {1, 0, 0, 1, 0, 1, 1, 0, 0, 1};    // * Expected Match Length: 10
-        utils::Logger::InfoLog(LOCATION, "Query: " + utils::VectorToStr(q));
+        std::vector<uint32_t> q  = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};    // Expected match length = 9
+        uint32_t              qs = q.size();
+        utils::Logger::InfoLog(LOCATION, "Query : " + utils::VectorToStr(q));
 
         tools::secret_sharing::shares_t q_sh = ss.Share(q);
-        uint32_t                        m_0{0}, m_1{0};
+        std::vector<uint32_t>           m(qs), m_0(qs), m_1(qs);
         if (party.GetId() == 0) {
             m_0 = fss::FMISearch(party, q_sh.first, bitsize);
         } else {
             m_1 = fss::FMISearch(party, q_sh.second, bitsize);
         }
-        uint32_t m = ss.Reconst(party, m_0, m_1);    // 実際はユーザが復元する部分
-        utils::PrintValidity("FMI Search", m, 10, false);
+        ss.Reconst(party, m_0, m_1, m);    // 実際はユーザが復元する部分
+        utils::Logger::InfoLog(LOCATION, "Result: " + utils::VectorToStr(m));
     }
     utils::Logger::InfoLog(LOCATION, "Program execution ends here...\n");
 

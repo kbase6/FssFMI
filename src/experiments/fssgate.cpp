@@ -27,6 +27,10 @@ const std::string kTestEqPath   = kCurrentPath + "/data/eq/";
 const std::string kEqKeyPath_P0 = kTestEqPath + "key_p0";
 const std::string kEqKeyPath_P1 = kTestEqPath + "key_p1";
 
+const std::string kTestCompPath   = kCurrentPath + "/data/comp/";
+const std::string kCompKeyPath_P0 = kTestCompPath + "key_p0";
+const std::string kCompKeyPath_P1 = kTestCompPath + "key_p1";
+
 const std::string kFMIPath        = kCurrentPath + "/data/fmi/";
 const std::string kFMIBTPath_F    = kFMIPath + "btf";
 const std::string kFMIBTPath_F_P0 = kFMIPath + "btf_p0";
@@ -39,7 +43,8 @@ const std::string kFMIKeyPath_P1  = kFMIPath + "key_p1";
 const std::string kFMIDBPath      = kFMIPath + "db";
 const std::string kFMIBWTPath     = kFMIPath + "bwt";
 
-const fss::DebugInfo dbg_info = fss::DebugInfo();
+fss::DebugInfo          dbg_info = fss::DebugInfo();
+fss::internal::FssKeyIo key_io;
 
 using bts_t = tools::secret_sharing::bts_t;
 
@@ -68,7 +73,6 @@ namespace fss {
 
 void ZeroTestSetup(const uint32_t bitsize) {
     zt::ZeroTestParameters params(bitsize, bitsize, dbg_info);
-    internal::FssKeyIo     key_io;
     zt::ZeroTest           zt(params);
 
     // Generate keys
@@ -85,7 +89,6 @@ void ZeroTestSetup(const uint32_t bitsize) {
 
 void EqualitySetup(const uint32_t bitsize) {
     zt::ZeroTestParameters params(bitsize, bitsize, dbg_info);
-    internal::FssKeyIo     key_io;
     zt::ZeroTest           zt(params);
 
     // Generate keys
@@ -100,9 +103,24 @@ void EqualitySetup(const uint32_t bitsize) {
     zt_keys.second.FreeZeroTestKey();
 }
 
+void CompareSetup(const uint32_t bitsize) {
+    comp::CompParameters    params(bitsize, bitsize, dbg_info);
+    comp::IntegerComparison comp(params);
+
+    // Generate keys
+    std::pair<comp::CompKey, comp::CompKey> comp_keys = comp.GenerateKeys();
+
+    key_io.WriteCompKeyToFile(kCompKeyPath_P0, comp_keys.first);
+    key_io.WriteCompKeyToFile(kCompKeyPath_P1, comp_keys.second);
+
+    utils::Logger::InfoLog(LOCATION, "Comparison keys have been generated.");
+
+    comp_keys.first.FreeCompKey();
+    comp_keys.second.FreeCompKey();
+}
+
 void FMISearchSetup(const uint32_t bitsize, std::vector<uint32_t> &database) {
     fmi::FssFmiParameters                        params(bitsize, kMaxQuerySize, dbg_info);
-    internal::FssKeyIo                           key_io;
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
     tools::secret_sharing::ShareHandler          sh;
     utils::FileIo                                io;
@@ -145,7 +163,6 @@ void FMISearchSetup(const uint32_t bitsize, std::vector<uint32_t> &database) {
 uint32_t ZeroTest(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t bitsize) {
     zt::ZeroTestParameters                       params(bitsize, bitsize, dbg_info);
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
-    internal::FssKeyIo                           key_io;
     zt::ZeroTest                                 zt(params);
 
     zt::ZeroTestKey zt_key;
@@ -175,7 +192,6 @@ uint32_t ZeroTest(tools::secret_sharing::Party &party, const uint32_t x, const u
 uint32_t Equality(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize) {
     zt::ZeroTestParameters                       params(bitsize, bitsize, dbg_info);
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
-    internal::FssKeyIo                           key_io;
     zt::ZeroTest                                 zt(params);
 
     zt::ZeroTestKey zt_key;
@@ -202,13 +218,49 @@ uint32_t Equality(tools::secret_sharing::Party &party, const uint32_t x, const u
     return result;
 }
 
-uint32_t FMISearch(tools::secret_sharing::Party &party, const std::vector<uint32_t> &q, const uint32_t bitsize) {
+uint32_t Compare(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize) {
+    comp::CompParameters                         params(bitsize, bitsize, dbg_info);
+    tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
+    comp::IntegerComparison                      comp(params);
+
+    comp::CompKey comp_key;
+    if (party.GetId() == 0) {
+        key_io.ReadCompKeyFromFile(kCompKeyPath_P0, bitsize, comp_key);
+    } else {
+        key_io.ReadCompKeyFromFile(kCompKeyPath_P1, bitsize, comp_key);
+    }
+
+    // Start communication
+    party.StartCommunication();
+
+    uint32_t result{0}, xr_0{0}, xr_1{0}, yr_0{0}, yr_1{0};
+    if (party.GetId() == 0) {
+        xr_0 = utils::Mod(x + comp_key.shr1_in, bitsize);
+        yr_0 = utils::Mod(y + comp_key.shr2_in, bitsize);
+    } else {
+        xr_1 = utils::Mod(x + comp_key.shr1_in, bitsize);
+        yr_1 = utils::Mod(y + comp_key.shr2_in, bitsize);
+    }
+    uint32_t xr = ss.Reconst(party, xr_0, xr_1);
+    uint32_t yr = ss.Reconst(party, yr_0, yr_1);
+
+    if (party.GetId() == 0) {
+        result = comp.Evaluate(comp_key, xr, yr) - comp_key.shr_out;
+    } else {
+        result = comp.Evaluate(comp_key, xr, yr) - comp_key.shr_out;
+    }
+
+    comp_key.FreeCompKey();
+
+    return result;
+}
+
+std::vector<uint32_t> FMISearch(tools::secret_sharing::Party &party, const std::vector<uint32_t> &q, const uint32_t bitsize) {
     fmi::FssFmiParameters                        params(bitsize, kMaxQuerySize, dbg_info);
-    internal::FssKeyIo                           key_io;
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
     tools::secret_sharing::ShareHandler          sh;
     utils::FileIo                                io;
-    uint32_t                                     qs = params.query_size;
+    uint32_t                                     qs = q.size();
     fmi::FssFmi                                  fss_fmi(params);
 
     // Set database (bwt)
@@ -239,18 +291,12 @@ uint32_t FMISearch(tools::secret_sharing::Party &party, const std::vector<uint32
     party.StartCommunication();
 
     // Execute Eval^{FssFMI} algorithm
-    std::vector<uint32_t> eq(qs), eq_0(qs), eq_1(qs);
-    uint32_t              seq_0{0}, seq_1{0}, result{0};
+    std::vector<uint32_t> result(qs);
     if (party.GetId() == 0) {
-        fss_fmi.Evaluate(party, fmi_key, q, eq_0);
-        seq_0 = std::reduce(eq_0.begin(), eq_0.end());
+        fss_fmi.Evaluate(party, fmi_key, q, result);
     } else {
-        fss_fmi.Evaluate(party, fmi_key, q, eq_1);
-        seq_1 = std::reduce(eq_1.begin(), eq_1.end());
+        fss_fmi.Evaluate(party, fmi_key, q, result);
     }
-    result = ss.Reconst(party, seq_0, seq_1);
-    fmi_key.FreeFssFmiKey();
-
     return result;
 }
 
