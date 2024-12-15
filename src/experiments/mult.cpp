@@ -10,16 +10,12 @@
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
 
-int mult(int arg, char *argv[]) {
+int mult(int party_id, uint32_t x, uint32_t y) {
     int         port         = comm::kDefaultPort;
     std::string host_address = comm::kDefaultAddress;
 
     uint32_t                                     bitsize = 32;
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
-
-    int      party_id = std::stoi(argv[1]);
-    uint32_t x        = std::stoi(argv[2]);
-    uint32_t y        = std::stoi(argv[3]);
 
     comm::CommInfo               comm_info(party_id, port, host_address);
     tools::secret_sharing::Party party(comm_info);

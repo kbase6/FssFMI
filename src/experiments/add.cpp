@@ -10,7 +10,7 @@
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
 
-int add(int argc, char *argv[])
+int add(uint32_t x, uint32_t y)
 {
     // int port = comm::kDefaultPort;
     // std::string host_address = comm::kDefaultAddress;
@@ -21,9 +21,6 @@ int add(int argc, char *argv[])
 
     // comm::CommInfo comm_info(party_id, port, host_address);
     // tools::secret_sharing::Party party(comm_info);
-
-    uint32_t x = std::stoi(argv[1]);
-    uint32_t y = std::stoi(argv[2]);
 
     uint32_t bitsize = 32;
     uint32_t z = utils::Mod(x + y, bitsize);
