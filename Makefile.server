@@ -15,7 +15,7 @@ DEPEXT      := d
 OBJEXT      := o
 
 # Compilation and linking flags
-CXXFLAGS    := -std=c++17 -Wall -Wextra -O3
+CXXFLAGS    := -std=c++17 -Wall -Wextra -Wno-unused-parameter -g -O3 -maes -mavx -DAES_NI_ENABLED
 LDFLAGS     := -lssl -lcrypto -lsdsl -ldivsufsort -ldivsufsort64
 INC         := -I/usr/include -I./src
 
@@ -24,11 +24,11 @@ MAIN_FILE   := $(SRCDIR)/experiments/server_test.cpp
 # TODO: ↑ path above is for temporary testing
 
 # File to exclude
-EXCLUDED_FILE := $(SRCDIR)/experiments/client_test.cpp
+EXCLUDED_FILE := $(SRCDIR)/experiments/client_test.cpp $(SRCDIR)/experiments/fssmain.cpp
 # TODO: ↑ path above is for temporary testing
 
 # All source files, excluding the main file and excluded files
-sources       := $(wildcard $(SRCDIR)/*.$(SRCEXT))
+sources       := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 filtered_sources := $(filter-out $(MAIN_FILE) $(EXCLUDED_FILE), $(sources))
 
 # Object files
