@@ -29,5 +29,5 @@ int main() {
 
     uint32_t res = mult(party_id, z, w);
 
-    return z;
+    return res;
 }

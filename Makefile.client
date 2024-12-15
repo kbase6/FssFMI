@@ -1,0 +1,72 @@
+# C++ compiler
+CXX         := g++
+
+# Binary to be generated
+TARGET      := fssClient
+
+# Directory names
+SRCDIR      := src
+BUILDDIR    := build
+TARGETDIR   := bin
+
+# Extension names
+SRCEXT      := cpp
+DEPEXT      := d
+OBJEXT      := o
+
+# Compilation and linking flags
+CXXFLAGS    := -std=c++17 -Wall -Wextra -O3
+LDFLAGS     := -lssl -lcrypto -lsdsl -ldivsufsort -ldivsufsort64
+INC         := -I/usr/include -I./src
+
+# Specify the main file
+MAIN_FILE   := $(SRCDIR)/experiments/client_test.cpp
+# TODO: ↑ path above is for temporary testing
+
+# File to exclude
+EXCLUDED_FILE := $(SRCDIR)/experiments/server_test.cpp
+# TODO: ↑ path above is for temporary testing
+
+# All source files, excluding the main file and excluded files
+sources       := $(wildcard $(SRCDIR)/*.$(SRCEXT))
+filtered_sources := $(filter-out $(MAIN_FILE) $(EXCLUDED_FILE), $(sources))
+
+# Object files
+objects       := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(subst $(SRCEXT),$(OBJEXT),$(filtered_sources)))
+main_object   := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(subst $(SRCEXT),$(OBJEXT),$(MAIN_FILE)))
+dependencies  := $(subst .$(OBJEXT),.$(DEPEXT),$(objects) $(main_object))
+
+# Default target to build the binary
+all: directories $(TARGETDIR)/$(TARGET)
+	@echo "Build complete"
+	@echo "  - Target binary: $(TARGETDIR)/$(TARGET)"
+
+# Create necessary directories
+directories:
+	@mkdir -p $(BUILDDIR) $(TARGETDIR)
+
+# Remove intermediate build files and final binary
+clean:
+	@rm -rf $(BUILDDIR) $(TARGETDIR)
+	@echo "Clean build"
+	@echo "  - Both intermediate build files and final binary file removed"
+
+# Include automatically generated .d files
+-include $(dependencies)
+
+# Link object files to generate the binary
+$(TARGETDIR)/$(TARGET): $(objects) $(main_object)
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+# Compile source files to generate object files
+$(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $<
+	@$(CXX) $(CXXFLAGS) $(INC) -MM $(SRCDIR)/$*.$(SRCEXT) > $(BUILDDIR)/$*.$(DEPEXT)
+	@cp -f $(BUILDDIR)/$*.$(DEPEXT) $(BUILDDIR)/$*.$(DEPEXT).tmp
+	@sed -e 's|.*:|$(BUILDDIR)/$*.$(OBJEXT):|' < $(BUILDDIR)/$*.$(DEPEXT).tmp > $(BUILDDIR)/$*.$(DEPEXT)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
+	@rm -f $(BUILDDIR)/$*.$(DEPEXT).tmp
+
+# Non-File Targets
+.PHONY: all clean directories
