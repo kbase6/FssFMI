@@ -27,14 +27,16 @@ int mult(int party_id, uint32_t x, uint32_t y) {
 
     if (party_id == 0) {
         tools::secret_sharing::bts_t bt_vec_0(1);
-        sh.LoadBTShare("file_path", bt_vec_0);
+        // TODO: Change the path of the Beaver Triple dynamically
+        sh.LoadBTShare("/home/matsuda/FssFMI/data/test/ss/bt_0", bt_vec_0);
         bt = bt_vec_0[0];
-    } else {
+    } else if (party_id == 1) {
         tools::secret_sharing::bts_t bt_vec_1(1);
-        sh.LoadBTShare("file_path", bt_vec_1);
+        // TODO: Change the path of the Beaver Triple dynamically
+        sh.LoadBTShare("/home/matsuda/FssFMI/data/test/ss/bt_1", bt_vec_1);
         bt = bt_vec_1[0];
     }
-
+    std::cout << "Beaver triplet: " << bt.a << ", " << bt.b << ", " << bt.c << std::endl;
     uint32_t z = ss.Mult(party, bt, x, y);
 
     party.EndCommunication();
