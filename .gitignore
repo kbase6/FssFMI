@@ -7,3 +7,5 @@ data/
 .clang-format
 
 __pycache__/
+
+generated_code.cpp
