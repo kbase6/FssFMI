@@ -332,8 +332,13 @@ inline uint32_t Pow(const uint32_t base, const uint32_t exponent) {
  * @param bitsize The bit size used for computing the modulo.
  * @return The result of 'value' modulo (2^bitsize).
  */
+// inline uint32_t Mod(const uint32_t value, const uint32_t bitsize) {
+//     return value & ((1UL << bitsize) - 1UL);
+// }
+// Suggested Mod function from ChatGPT
 inline uint32_t Mod(const uint32_t value, const uint32_t bitsize) {
-    return value & ((1UL << bitsize) - 1UL);
+    uint64_t mask = (uint64_t(1) << bitsize) - 1ULL;
+    return static_cast<uint32_t>(value & mask);
 }
 
 /**
