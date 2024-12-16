@@ -39,3 +39,21 @@ int main() {
 
     return res;
 }
+
+// Test calculation: 12 * 13
+// Shares 12: 5, 7
+//        13: 6, 7
+// int main() {
+//     int      party_id = 0;
+//     uint32_t x        = 5;
+//     uint32_t y        = 6;
+
+//     std::cout << "x: " << x << std::endl;
+//     std::cout << "y: " << y << std::endl;
+
+//     uint32_t res = mult(party_id, x, y);
+
+//     std::cout << "mult result: " << res << std::endl;
+
+//     return res;
+// }
