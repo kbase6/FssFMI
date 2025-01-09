@@ -340,102 +340,19 @@ if __name__ == "__main__":
   "program": [
     {
       "type": "assign",
-      "name": "baseValue",
-      "value": 42
-    },
-    {
-      "type": "call",
-      "name": "func1",
-      "function": "add",
-      "args": ["baseValue", 3]
-    },
-    {
-      "type": "call",
-      "name": "func2",
-      "function": "mult",
-      "args": ["func1", 2]
-    },
-    {
-      "type": "if",
-      "name": "func3", 
-      "condition": {
-        "lhs": "func2",
-        "op": "<",
-        "rhs": 100
-      },
-      "then": [
-        {
-          "type": "for",
-          "init": { "name": "i", "value": 0 },
-          "condition": { "lhs": "i", "op": "<", "rhs": 3 },
-          "update": "i++",
-          "body": [
-            {
-              "type": "call",
-              "function": "add",
-              "args": ["func2", "i"]
-            }
-          ]
-        },
-        {
-          "type": "call",
-          "function": "mult",
-          "args": ["func2", 10]
-        }
-      ],
-      "else": [
-        {
-          "type": "if",
-          "name": "nestedIfResult",
-          "condition": {
-            "lhs": "func2",
-            "op": "==",
-            "rhs": 200
-          },
-          "then": [
-            {
-              "type": "assign",
-              "name": "tempVar",
-              "value": 999
-            }
-          ],
-          "else": [
-            {
-              "type": "call",
-              "function": "add",
-              "args": ["func2", 1000]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "if",
-      "name": "lastIf",
-      "condition": {
-        "lhs": "func3",
-        "op": ">",
-        "rhs": 500
-      },
-      "then": [
-        {
-          "type": "call",
-          "function": "add",
-          "args": ["func3", 10]
-        }
-      ],
-      "else": [
-        {
-          "type": "call",
-          "function": "mult",
-          "args": ["func3", 2]
-        }
-      ]
+      "name": "product",
+      "value": "mult(a, x)"
     },
     {
       "type": "assign",
-      "name": "finalValue",
-      "value": "lastIf"
+      "name": "sum",
+      "value": "add(c, z)"
+    },
+    {
+      "type": "call",
+      "name": "comparisonResult",
+      "function": "Compare",
+      "args": ["product", "sum"]
     }
   ]
 }
