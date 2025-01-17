@@ -9,10 +9,15 @@
 #include "../tools/tools.hpp"
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
+#include "add.hpp"
+#include "mult.hpp"
+#include "select.hpp"
 
-int mult(tools::secret_sharing::Party &party, uint32_t x, uint32_t y) {
-
-    uint32_t                                     bitsize = 32;
+int Select(tools::secret_sharing::Party &party, uint32_t b, uint32_t x, uint32_t y) {
+    /*
+    if b is 1, return x; otherwise, return y.
+    */
+    uint32_t bitsize = 32;
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
 
     party.StartCommunication();
@@ -22,17 +27,21 @@ int mult(tools::secret_sharing::Party &party, uint32_t x, uint32_t y) {
 
     if (party.GetId() == 0) {
         tools::secret_sharing::bts_t bt_vec_0(1);
-        // TODO: Change the path of the Beaver Triple dynamically
         sh.LoadBTShare("/home/matsuda/FssFMI/data/test/ss/bt_0", bt_vec_0);
         bt = bt_vec_0[0];
     } else {
         tools::secret_sharing::bts_t bt_vec_1(1);
-        // TODO: Change the path of the Beaver Triple dynamically
         sh.LoadBTShare("/home/matsuda/FssFMI/data/test/ss/bt_1", bt_vec_1);
         bt = bt_vec_1[0];
     }
-    // std::cout << "Beaver triplet: " << bt.a << ", " << bt.b << ", " << bt.c << std::endl;
-    uint32_t res = ss.Mult(party, bt, x, y);
+
+    // Compute (x-y) mod 2^bitsize
+    uint32_t delta = utils::Mod(x - y, 1u << bitsize);
+
+    // Perform secure multiplication
+    uint32_t z = mult(party, b, delta);
+
+    uint32_t res = add(y, z);
 
     party.EndCommunication();
 
