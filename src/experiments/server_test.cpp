@@ -14,6 +14,7 @@
 #include "add.hpp"
 #include "fssgate.hpp"
 #include "mult.hpp"
+#include "select.hpp"
 
 // Test calculation: (4 + 6) * 3
 // Shares 4: 1, 3
@@ -40,7 +41,7 @@
 //     return res;
 // }
 
-
+// Test caculation: x = 10, y = 20 return larger integer
 int main() {
     int          port         = comm::kDefaultPort;
     std::string  host_address = comm::kDefaultAddress;
@@ -50,7 +51,12 @@ int main() {
     tools::secret_sharing::Party party(comm_info);
 
     uint32_t bitsize = 32;
-    tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
 
-    
+    uint32_t x = 6;
+    uint32_t y = 14;
+
+    uint32_t b = fss::Compare(party, x, y, bitsize);
+    uint32_t res = select(party, b, x, y, bitsize);
+
+    return res;
 }

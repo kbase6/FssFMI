@@ -38,9 +38,9 @@ uint32_t select(tools::secret_sharing::Party &party, uint32_t b, uint32_t x, uin
     uint32_t delta = utils::Mod(x - y, 1u << bitsize);
 
     // Perform secure multiplication
-    uint32_t z = mult(party, b, delta);
+    uint32_t z = mult(party, b, delta, bitsize);
 
-    uint32_t res = add(y, z);
+    uint32_t res = add(y, z, bitsize);
 
     party.EndCommunication();
 
