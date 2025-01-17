@@ -3,6 +3,6 @@
 
 #include <cstdint>
 
-int add(uint32_t x, uint32_t y);
+uint32_t add(uint32_t x, uint32_t y, const uint32_t bitsize);
 
 #endif    // SECURE_ADD

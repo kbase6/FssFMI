@@ -19,41 +19,38 @@
 // Shares 4: 1, 3
 //        6: 4, 2
 //        3: 1, 2
-int main() {
-    int      party_id = 0;
-    uint32_t x        = 1;
-    uint32_t y        = 4;
-    uint32_t w        = 1;
-
-    std::cout << "x: " << x << std::endl;
-    std::cout << "y: " << y << std::endl;
-    std::cout << "w: " << w << std::endl;
-
-    uint32_t z = add(x, y);
-
-    std::cout << "add result: " << z << std::endl;
-
-    uint32_t res = mult(party_id, z, w);
-
-    std::cout << "mult result: " << res << std::endl;
-
-    return res;
-}
-
-// Test calculation: 12 * 13
-// Shares 12: 5, 7
-//        13: 6, 7
 // int main() {
 //     int      party_id = 0;
-//     uint32_t x        = 5;
-//     uint32_t y        = 6;
+//     uint32_t x        = 1;
+//     uint32_t y        = 4;
+//     uint32_t w        = 1;
 
 //     std::cout << "x: " << x << std::endl;
 //     std::cout << "y: " << y << std::endl;
+//     std::cout << "w: " << w << std::endl;
 
-//     uint32_t res = mult(party_id, x, y);
+//     uint32_t z = add(x, y);
+
+//     std::cout << "add result: " << z << std::endl;
+
+//     uint32_t res = mult(party_id, z, w);
 
 //     std::cout << "mult result: " << res << std::endl;
 
 //     return res;
 // }
+
+
+int main() {
+    int          port         = comm::kDefaultPort;
+    std::string  host_address = comm::kDefaultAddress;
+    int          party_id     = 0;
+
+    comm::CommInfo               comm_info(party_id, port, host_address);
+    tools::secret_sharing::Party party(comm_info);
+
+    uint32_t bitsize = 32;
+    tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
+
+    
+}

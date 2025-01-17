@@ -10,7 +10,7 @@
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
 
-int add(uint32_t x, uint32_t y, const uint32_t bitsize) {
+uint32_t add(uint32_t x, uint32_t y, const uint32_t bitsize) {
 
     uint32_t z       = utils::Mod(x + y, bitsize);
 
