@@ -6,6 +6,7 @@
  * @brief Communication test implementation.
  */
 
+#include <cstdint>
 #include "comm.hpp"
 
 #include "../utils/logger.hpp"

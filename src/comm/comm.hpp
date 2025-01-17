@@ -10,6 +10,7 @@
 #define COMM_H_
 
 #include <string>
+#include <cstdint>
 
 namespace comm {
 
