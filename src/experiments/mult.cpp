@@ -10,9 +10,8 @@
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
 
-int mult(tools::secret_sharing::Party &party, uint32_t x, uint32_t y) {
+int mult(tools::secret_sharing::Party &party, uint32_t x, uint32_t y, const uint32_t bitsize) {
 
-    uint32_t                                     bitsize = 32;
     tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
 
     party.StartCommunication();
