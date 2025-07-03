@@ -16,15 +16,15 @@
 
 namespace fss {
 
-void ZeroTestSetup(const uint32_t bitsize);
-void EqualitySetup(const uint32_t bitsize);
-void CompareSetup(const uint32_t bitsize);                                       // * 1 is x<y else 0 (ただし|x-y| < 2^(n-1)しか判定できない)
+void ZeroTestSetup(const uint32_t bitsize = 32);
+void EqualitySetup(const uint32_t bitsize = 32);
+void CompareSetup(const uint32_t bitsize = 32);                                  // * 1 is x<y else 0 (ただし|x-y| < 2^(n-1)しか判定できない)
 void FMISearchSetup(const uint32_t bitsize, std::vector<uint32_t> &database);    // * MaxQuerySize is 2^7 = 128
 
-uint32_t              ZeroTest(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t bitsize);
-uint32_t              Equality(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize);
-uint32_t              Compare(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize);
-std::vector<uint32_t> FMISearch(tools::secret_sharing::Party &party, const std::vector<uint32_t> &q, const uint32_t bitsize);
+uint32_t              ZeroTest(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t bitsize = 32);
+uint32_t              Equality(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize = 32);
+uint32_t              Compare(tools::secret_sharing::Party &party, const uint32_t x, const uint32_t y, const uint32_t bitsize = 32);
+std::vector<uint32_t> FMISearch(tools::secret_sharing::Party &party, const std::vector<uint32_t> &q, const uint32_t bitsize = 32);
 
 }    // namespace fss
 

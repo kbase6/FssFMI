@@ -16,11 +16,10 @@
 uint32_t select(tools::secret_sharing::Party &party, uint32_t b, uint32_t x, uint32_t y, const uint32_t bitsize) {
     /*
     if b is 1, return x; otherwise, return y.
+    Computes b(x-y) + y
     */
-    tools::secret_sharing::AdditiveSecretSharing ss(bitsize);
 
-    party.StartCommunication();
-
+    // party.StartCommunication();
     tools::secret_sharing::ShareHandler  sh;
     tools::secret_sharing::BeaverTriplet bt;
 
@@ -35,14 +34,9 @@ uint32_t select(tools::secret_sharing::Party &party, uint32_t b, uint32_t x, uin
     }
 
     // Compute (x-y) mod 2^bitsize
-    uint32_t delta = utils::Mod(x - y, 1u << bitsize);
-
-    // Perform secure multiplication
-    uint32_t z = mult(party, b, delta, bitsize);
-
-    uint32_t res = add(y, z, bitsize);
-
-    party.EndCommunication();
+    uint32_t delta = utils::Mod(x - y, bitsize);
+    uint32_t z     = mult(party, b, delta, bitsize);
+    uint32_t res   = add(y, z, bitsize);
 
     return res;
 }

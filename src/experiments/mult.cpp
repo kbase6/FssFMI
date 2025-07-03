@@ -31,9 +31,7 @@ uint32_t mult(tools::secret_sharing::Party &party, uint32_t x, uint32_t y, const
         bt = bt_vec_1[0];
     }
     // std::cout << "Beaver triplet: " << bt.a << ", " << bt.b << ", " << bt.c << std::endl;
-    uint32_t res = ss.Mult(party, bt, x, y);
+    uint32_t prod = ss.Mult(party, bt, x, y);
 
-    party.EndCommunication();
-
-    return res;
+    return prod;
 }

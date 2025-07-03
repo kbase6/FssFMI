@@ -10,9 +10,9 @@
 #include "../utils/logger.hpp"
 #include "../utils/utils.hpp"
 
-uint32_t add(uint32_t x, uint32_t y, const uint32_t bitsize) {
+uint32_t add(uint32_t x, uint32_t y, const uint32_t bitsize = 32) {
 
-    uint32_t z       = utils::Mod(x + y, bitsize);
+    uint32_t sum = utils::Mod(x + y, bitsize);
 
-    return z;
+    return sum;
 }
