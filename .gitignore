@@ -7,3 +7,5 @@ data/
 __pycache__/
 
 generated_code.cpp
+client_test.cpp
+server_test.cpp
